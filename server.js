@@ -28,7 +28,7 @@ whatsapp.on('ready', () => {
 
 whatsapp.on('message', async message => {
     if (message.body === "hello" || message.body === "Hello") {
-        message.reply("My name is Francisco");
+        message.reply("Hello scientone from ec2 aws");
     }
 });
 
