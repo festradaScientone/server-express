@@ -1,6 +1,6 @@
 const express = require('express');
 const qrcode = require('qrcode');
-const { Client, LocalAuth , MessageMedia, Location} = require('whatsapp-web.js');
+const { Client, LocalAuth , MessageMedia, Location, Buttons} = require('whatsapp-web.js');
 var body_parser = require('body-parser');
 
 require('dotenv').config();
@@ -39,6 +39,7 @@ app.post('/instance_id/messages/chat', function (req, res) {
     res.send('Send message Done');
 });
 
+
 ///{INSTANCE_ID}/messages/image
 app.post('/instance_id/messages/image', async function (req, res) {
     console.log('req.body', req.body);
@@ -67,7 +68,7 @@ app.post('/instance_id/messages/location', async function (req, res) {
     const longitude  = parseFloat(req.body.longitude) || 0;;
     const description  = req.body.description || '';
 
-    const location = new Location(latitude, longitude);
+    const location = new Location(latitude, longitude,description);
     const chatId = number.substring(1)+ "@c.us";
     console.log('chatId',chatId)
     whatsapp.sendMessage(chatId, location);
