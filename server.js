@@ -1,11 +1,12 @@
 const express = require('express');
 const qrcode = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
+var body_parser = require('body-parser');
 
 require('dotenv').config();
 
 const app = express();
-
+app.use(body_parser.urlencoded({extended:true}));
 // Configuración de WhatsApp
 const whatsapp = new Client({
     authStrategy: new LocalAuth({
@@ -14,6 +15,8 @@ const whatsapp = new Client({
     puppeteer: { headless: true }, // Asegura que Puppeteer, que usa WhatsApp Web JS internamente, corra en modo headless
 });
 
+
+
 let qrCodeData; // Variable para almacenar los datos del código QR
 
 whatsapp.on('qr', qrData => {
@@ -21,16 +24,34 @@ whatsapp.on('qr', qrData => {
     qrCodeData = qrData; // Almacena los datos del código QR
 });
 
+app.post('/instance_id/messages/chat', function (req, res) {
+    console.log('req.body', req.body);
+
+    const number = req.body.number|| '';
+
+    const Body_msg  = req.body.Body_msg|| '';
+  
+    console.log(number);
+    console.log(Body_msg)
+    const chatId = number.substring(1)+ "@c.us";
+    console.log('chatId',chatId)
+    whatsapp.sendMessage(chatId, Body_msg);
+    res.send('Send message Done');
+});
+
 whatsapp.on('ready', () => {
     console.log('¡WhatsApp está listo!');
     qrCodeData = null; // Limpia el código QR ya que no es necesario después de la autenticación
 });
 
+// Escucha de mensajes entrantes
 whatsapp.on('message', async message => {
     if (message.body === "hello" || message.body === "Hello") {
         message.reply("Hello scientone from ec2 aws");
     }
 });
+
+
 
 // Ruta para mostrar el código QR
 app.get('/qr', async (req, res) => {
