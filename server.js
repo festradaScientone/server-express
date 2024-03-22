@@ -1,6 +1,6 @@
 const express = require('express');
 const qrcode = require('qrcode');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth , MessageMedia, Location} = require('whatsapp-web.js');
 var body_parser = require('body-parser');
 
 require('dotenv').config();
@@ -39,10 +39,50 @@ app.post('/instance_id/messages/chat', function (req, res) {
     res.send('Send message Done');
 });
 
+///{INSTANCE_ID}/messages/image
+app.post('/instance_id/messages/image', async function (req, res) {
+    console.log('req.body', req.body);
+
+    const number = req.body.number|| '';
+    const imageUrl  = req.body.imageUrl|| '';
+    const imageCaption  = req.body.imageCaption|| '';
+
+    const media = await MessageMedia.fromUrl(imageUrl);
+    media.mimetype = "image/png";
+    media.filename = "CustomImageName.png";
+    console.log(number);
+    //console.log(Body_msg)
+    const chatId = number.substring(1)+ "@c.us";
+    console.log('chatId',chatId)
+    whatsapp.sendMessage(chatId, media, {caption: "Image from backend"})
+    res.send('Send message Done');
+});
+
+//messages/location
+app.post('/instance_id/messages/location', async function (req, res) {
+    console.log('req.body', req.body);
+    
+    const number = req.body.number || '';
+    const latitude = parseFloat(req.body.latitude) || 0;;
+    const longitude  = parseFloat(req.body.longitude) || 0;;
+    const description  = req.body.description || '';
+
+    const location = new Location(latitude, longitude);
+    const chatId = number.substring(1)+ "@c.us";
+    console.log('chatId',chatId)
+    whatsapp.sendMessage(chatId, location);
+    res.send('Send message Done');
+});
+
 whatsapp.on('ready', () => {
     console.log('¡WhatsApp está listo!');
     qrCodeData = null; // Limpia el código QR ya que no es necesario después de la autenticación
 });
+
+whatsapp.on('error', (error) => {
+    console.error('Error en el cliente de WhatsApp:', error);
+});
+
 
 // Escucha de mensajes entrantes
 whatsapp.on('message', async message => {
